@@ -1,0 +1,35 @@
+# Unique files #
+######################
+*.jar
+*.bat
+*.classpath
+*.project
+*.iml
+*.ipr
+*.iws
+*.properties
+*.zip
+*.txt
+*.odt
+Media/
+bin/
+.git/
+resources/backup/
+config/
+crash-reports/
+logs/
+mods/
+resourcepacks/
+saves/
+libs/
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+/bin

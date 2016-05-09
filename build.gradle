@@ -1,0 +1,96 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
+    }
+}
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'idea'
+
+//Adds my custom core library mod to the list of module dependencies in idea during 'setupDecompWorkspace'.
+/*idea.module.iml {
+    whenMerged { module ->
+        module.dependencies.add(new org.gradle.plugins.ide.idea.model.ModuleDependency('ArdentCore', 'COMPILE'))
+    }
+}*/
+
+//Load the config file
+ext.config = parseConfig(file('build.properties'))
+
+//Current version of my mod. Gets appended to the end of the jar name
+version = "${config.minecraft_version}-${config.mod_version}"
+//Java file structure/hierarchy
+group = "${config.group}" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+//Name of the mod. Used to name the resulting jar
+archivesBaseName = config.mod_name
+
+minecraft {
+    version = "${config.minecraft_version}-${config.forge_version}"
+    runDir = "run"
+    mappings = "stable_20"
+    //Only used by the JEI repo
+    useDepAts = true
+}
+
+repositories {
+    maven { //The repo from which to get Waila
+        name "Mobius Repo"
+        url "http://mobiusstrip.eu/maven"
+    }
+    maven { //The repo from which to get JEI
+        name "JEI Repo"
+        url "http://dvs1.progwml6.com/files/maven"
+    }
+    maven { //the repo from which to get NEI, CodeChickenCore
+        name "ChickenBones Repo"
+        url "http://chickenbones.net/maven/"
+    }
+}
+
+dependencies {
+    deobfCompile "mcp.mobius.waila:Waila:1.6.0-B3_1.8.8:dev"
+    deobfCompile "mezz.jei:jei_1.8.9:2.25.7.145"
+    /* Disabled in lieu of Mezz's JEI
+    deobfCompile "codechicken:CodeChickenCore:1.8-1.0.5.36:dev"
+    compile "codechicken:CodeChickenLib:1.7.10-1.1.3.136:dev"
+    */
+}
+
+processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+                
+        // replace version and mcversion
+        expand 'version':project.version, 'mcversion':project.minecraft.version
+    }
+        
+    // copy everything else, thats not the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+def parseConfig(File config) {
+    config.withReader {
+        def prop = new Properties()
+        prop.load(it)
+        return (new ConfigSlurper().parse(prop))
+    }
+}
+
+idea {
+    module {
+        inheritOutputDirs = true
+    }
+}
